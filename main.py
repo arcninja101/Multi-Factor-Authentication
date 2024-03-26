@@ -12,6 +12,7 @@ user_mapping = {
     "Aryan":"user1",
     "Shivangi": "user2",
     "Vinithra": "user3",
+    "Vishal": "user4"
     # Add more users as needed
 }
 
@@ -21,6 +22,7 @@ user_email_mapping = {
     "Aryan": "aryan@example.com",
     "Shivangi": "shivangi@example.com",
     "Vinithra": "vinithra@example.com",
+    "Vishal": "vishalbommisetty@gmail.com"
     # Add more users as needed
 }
 
@@ -97,9 +99,19 @@ def authenticate_user_otp(username):
 
 # Function to authenticate user based on detected faces
 def authenticate_user_face():
-    recog = Recognizer(user_mapping)
-    user_name = recog.recognize()
-    return user_name
+    attempts = 2
+    while attempts > 0:
+        recog = Recognizer(user_mapping)
+        user_name = recog.recognize()
+        if user_name == username:
+            return user_name
+        else:
+            if(attempts!=1 or attempts!=2):
+                print()
+                print("User Not Recognized.")
+                print("Please Try Again.")
+            attempts -= 1
+    return None
 
 # Main functionality
 def main():
@@ -137,7 +149,13 @@ def main():
             exit()
 
         # Authenticate user using face detection
-        authenticated_user = authenticate_user_face()
+        authenticated_user = None
+        while not authenticated_user:
+            authenticated_user = authenticate_user_face()
+            if authenticated_user:
+                break
+            break
+        
         if authenticated_user:
             try:
                 enc.decrypt_file(file_path)
@@ -147,7 +165,9 @@ def main():
             except Exception as e:
                 print("Decryption Failed:", e)
         else:
+            print()
             print("Face Authentication Failed. Exiting.")
+
 
     else:
         print("Incorrect Mode")

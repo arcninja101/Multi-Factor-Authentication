@@ -18,7 +18,7 @@ imagePaths = list(paths.list_images("./dataset"))
 
 
 
-for (_,imagePath) in enumerate(imagePaths):
+for (_, imagePath) in enumerate(imagePaths):
     name = imagePath.split(os.path.sep)[-2]
     image = cv2.imread(str(imagePath))
 
@@ -26,7 +26,6 @@ for (_,imagePath) in enumerate(imagePaths):
     image_blob = cv2.dnn.blobFromImage(
             cv2.resize(image, (300, 300)), 1.0, (300, 300),
             (104.0, 177.0, 123.0), swapRB=False, crop=False)
-
 
     detector.setInput(image_blob)
     detections = detector.forward()
@@ -36,12 +35,24 @@ for (_,imagePath) in enumerate(imagePaths):
     x1,y1,x2,y2 = box.astype(int)
     face = image[y1:y2,x1:x2]
 
+    # Check if face is None (i.e., face detection failed)
+    if face is None:
+        print("No face detected in:", imagePath)
+        continue
+
+    # Check if face dimensions are valid
+    if face.shape[0] == 0 or face.shape[1] == 0:
+        print("Invalid face dimensions in:", imagePath)
+        continue
+
+    # Resize the face image and create blob
     faceBlob = cv2.dnn.blobFromImage(face, 1.0 / 255,
         (96, 96), (0, 0, 0), swapRB=True, crop=False)
     embedding.setInput(faceBlob)
     embedding_val = embedding.forward()
     embeddings.append(embedding_val.flatten())
     names.append(name)
+
 
 
 data = {"embeddings" : embeddings ,"names" : names}
